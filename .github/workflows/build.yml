@@ -20,8 +20,14 @@ jobs:
           root_file: ${{ env.FILE }}.tex
           working_directory: ${{ env.DIR }}
 
+      - name: List Files for Debugging
+        run: ls -R ${{ env.DIR }}
+
       - name: Move PDF to Artifacts Directory
         run: mkdir -p github_artifacts && mv ${{ env.DIR }}/${{ env.FILE }}.pdf ./github_artifacts/
+
+      - name: List Artifacts Directory for Debugging
+        run: ls -R ./github_artifacts
 
       - name: Upload PDF as Artifact
         uses: actions/upload-artifact@v3
@@ -42,6 +48,9 @@ jobs:
           name: cv-pdf
           path: github_artifacts
 
+      - name: List Downloaded Artifacts for Debugging
+        run: ls -R github_artifacts
+
       - name: Prepare Deploy Directory
         run: mkdir -p github_deploy && mv github_artifacts/${{ env.FILE }}.pdf github_deploy/
 
@@ -61,10 +70,9 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+
       - name: Copy Index and CNAME to Branches
         uses: planetoftheweb/copy-to-branches@v1.3
         env:
           key: main
           files: index.html CNAME
-      - name: List files for debugging
-        run: ls -R
