@@ -26,8 +26,8 @@ jobs:
       - name: Upload PDF as Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ env.FILE }}.pdf
-          path: ./github_artifacts
+          name: cv-pdf
+          path: ./github_artifacts/${{ env.FILE }}.pdf
 
   deploy:
     needs: build
@@ -39,11 +39,11 @@ jobs:
       - name: Download Artifact
         uses: actions/download-artifact@v3
         with:
-          name: ${{ env.FILE }}.pdf
+          name: cv-pdf
           path: github_artifacts
 
       - name: Prepare Deploy Directory
-        run: mkdir -p github_deploy && mv github_artifacts/${{ env.FILE }}.pdf github_deploy
+        run: mkdir -p github_deploy && mv github_artifacts/${{ env.FILE }}.pdf github_deploy/
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
