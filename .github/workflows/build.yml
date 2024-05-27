@@ -1,41 +1,51 @@
-# With some help from: https://gist.github.com/dgerosa/2e1f47a39180f39bde848e38243efa94
-
+permissions:
+  contents: write
 name: build
+
 on: [push]
+
 jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      # Edit here with the names of your latex file and directory (can use ".")
       DIR: .
       FILE: cv
     steps:
       - name: Set up Git repository
         uses: actions/checkout@v3
-      - name: cv
+
+      - name: Compile CV
         uses: dante-ev/latex-action@latest
         with:
-          root_file: ${{ env.FILE }}
+          root_file: ${{ env.FILE }}.tex
           working_directory: ${{ env.DIR }}
-      - name: move
+
+      - name: Move PDF to Artifacts Directory
         run: mkdir -p github_artifacts && mv ${{ env.DIR }}/${{ env.FILE }}.pdf ./github_artifacts/
-      - name: Upload pdf as artifact
+
+      - name: Upload PDF as Artifact
         uses: actions/upload-artifact@v3
         with:
           name: ${{ env.FILE }}.pdf
           path: ./github_artifacts
+
   deploy:
-    needs: [build]
+    needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v3
-      - uses: actions/download-artifact@v3
+
+      - name: Download Artifact
+        uses: actions/download-artifact@v3
         with:
+          name: ${{ env.FILE }}.pdf
           path: github_artifacts
-      - name: move
-        run: mkdir -p github_deploy && mv github_artifacts/*/* github_deploy
-      - name: deploy on orphan branch
+
+      - name: Prepare Deploy Directory
+        run: mkdir -p github_deploy && mv github_artifacts/${{ env.FILE }}.pdf github_deploy
+
+      - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -43,14 +53,16 @@ jobs:
           publish_branch: build
           force_orphan: true
           enable_jekyll: true
+
   copy-index-to-build:
-    needs: [deploy]
+    needs: deploy
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Copy To Branches Action
+
+      - name: Copy Index and CNAME to Branches
         uses: planetoftheweb/copy-to-branches@v1.3
         env:
           key: main
