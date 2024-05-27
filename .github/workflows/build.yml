@@ -61,9 +61,10 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-
       - name: Copy Index and CNAME to Branches
         uses: planetoftheweb/copy-to-branches@v1.3
         env:
           key: main
           files: index.html CNAME
+      - name: List files for debugging
+        run: ls -R
