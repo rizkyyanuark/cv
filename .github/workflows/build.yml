@@ -17,16 +17,16 @@ jobs:
       - name: Compile CV
         uses: dante-ev/latex-action@latest
         with:
-          root_file: ${{ env.FILE }}.tex
+          root_file: ${{ env.FILE }}.tex  # Ensure the file extension is included
           working_directory: ${{ env.DIR }}
 
-      - name: List Files for Debugging
+      - name: List files for debugging (before moving)
         run: ls -R ${{ env.DIR }}
 
       - name: Move PDF to Artifacts Directory
         run: mkdir -p github_artifacts && mv ${{ env.DIR }}/${{ env.FILE }}.pdf ./github_artifacts/
 
-      - name: List Artifacts Directory for Debugging
+      - name: List files in artifacts directory for debugging
         run: ls -R ./github_artifacts
 
       - name: Upload PDF as Artifact
@@ -36,7 +36,7 @@ jobs:
           path: ./github_artifacts/${{ env.FILE }}.pdf
 
   deploy:
-    needs: build
+    needs: [build]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -48,7 +48,7 @@ jobs:
           name: cv-pdf
           path: github_artifacts
 
-      - name: List Downloaded Artifacts for Debugging
+      - name: List downloaded artifacts for debugging
         run: ls -R github_artifacts
 
       - name: Prepare Deploy Directory
@@ -64,7 +64,7 @@ jobs:
           enable_jekyll: true
 
   copy-index-to-build:
-    needs: deploy
+    needs: [deploy]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
